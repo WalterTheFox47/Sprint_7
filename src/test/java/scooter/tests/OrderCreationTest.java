@@ -2,6 +2,7 @@ package scooter.tests;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import io.qameta.allure.Description;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +17,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
 @RunWith(Parameterized.class)
-public class OrderCreationTest {
+public class OrderCreationTest extends BaseTest {
     private OrderClient orderClient;
     private Order order;
     private List<String> color;
@@ -37,13 +38,14 @@ public class OrderCreationTest {
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru";
         orderClient = new OrderClient();
         order = Order.getRandom();
         order.setColor(color);
     }
 
     @Test
+    @Description("Проверка, что заказ можно создать с разными вариантами цветов самокатов. " +
+            "Для каждого варианта цвет должен быть передан корректно, и ответ должен содержать track.")
     public void orderCanBeCreatedWithDifferentColorOptions() {
         Response response = orderClient.create(order);
         response.then().statusCode(201).body("track", notNullValue());

@@ -2,6 +2,7 @@ package scooter.tests;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import io.qameta.allure.Description;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,14 +13,13 @@ import scooter.model.CourierCredentials;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
-public class CourierLoginTest {
+public class CourierLoginTest extends BaseTest {
     private Courier courier;
     private CourierClient courierClient;
     private Integer courierId;
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru";
         courierClient = new CourierClient();
         courier = Courier.getRandom();
         courierClient.create(courier);
@@ -35,12 +35,14 @@ public class CourierLoginTest {
     }
 
     @Test
+    @Description("Проверка, что курьер может авторизоваться с валидными данными. Должен быть возвращен id.")
     public void courierCanLoginWithValidData() {
         Response response = courierClient.login(CourierCredentials.from(courier));
         response.then().statusCode(200).body("id", notNullValue());
     }
 
     @Test
+    @Description("Проверка, что при неправильном пароле для логина возвращается ошибка 404 с сообщением 'Учетная запись не найдена'.")
     public void loginWithIncorrectPasswordReturnsError() {
         CourierCredentials wrongCredentials = new CourierCredentials(courier.getLogin(), "wrong_password");
         Response response = courierClient.login(wrongCredentials);
@@ -48,6 +50,7 @@ public class CourierLoginTest {
     }
 
     @Test
+    @Description("Проверка, что при неправильном логине для авторизации возвращается ошибка 404 с сообщением 'Учетная запись не найдена'.")
     public void loginWithIncorrectLoginReturnsError() {
         CourierCredentials wrongCredentials = new CourierCredentials("wrong_login", courier.getPassword());
         Response response = courierClient.login(wrongCredentials);
@@ -55,6 +58,7 @@ public class CourierLoginTest {
     }
 
     @Test
+    @Description("Проверка, что при отсутствии логина в запросе на авторизацию возвращается ошибка 400 с сообщением 'Недостаточно данных для входа'.")
     public void loginWithoutLoginReturnsError() {
         CourierCredentials credentialsWithoutLogin = new CourierCredentials(null, courier.getPassword());
         Response response = courierClient.login(credentialsWithoutLogin);
@@ -62,6 +66,7 @@ public class CourierLoginTest {
     }
 
     @Test
+    @Description("Проверка, что при попытке авторизоваться с несуществующим пользователем возвращается ошибка 404 с сообщением 'Учетная запись не найдена'.")
     public void loginWithNonExistentUserReturnsError() {
         CourierCredentials nonExistentCredentials = new CourierCredentials("nonexistent", "nonexistent");
         Response response = courierClient.login(nonExistentCredentials);
