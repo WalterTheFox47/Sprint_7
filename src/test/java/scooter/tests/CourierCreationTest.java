@@ -33,6 +33,8 @@ public class CourierCreationTest extends BaseTest {
     public void courierCanBeCreatedWithValidData() {
         Response response = courierClient.create(courier);
         response.then().statusCode(201).body("ok", equalTo(true));
+        Response loginResponse = courierClient.login(CourierCredentials.from(courier));
+        courierId = loginResponse.then().extract().path("id");
     }
 
     @Test
