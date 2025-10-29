@@ -29,13 +29,17 @@ public class CourierCreationTest extends BaseTest {
     }
 
     @Test
-    @Description("Проверка создания курьера с валидными данными. Курьер должен быть создан и ответ должен содержать ok: true.")
-    public void courierCanBeCreatedWithValidData() {
-        Response response = courierClient.create(courier);
-        response.then().statusCode(201).body("ok", equalTo(true));
+    @Description("Проверка создания курьера с валидными данными и логина. Курьер должен быть создан, ответ должен содержать ok: true, а при логине возвращаться id курьера.")
+    public void courierCanBeCreatedAndLoginReturnsId() {
+        Response createResponse = courierClient.create(courier);
+        createResponse.then().statusCode(201).body("ok", equalTo(true));
+
         Response loginResponse = courierClient.login(CourierCredentials.from(courier));
+        loginResponse.then().statusCode(200).body("id", notNullValue());
+
         courierId = loginResponse.then().extract().path("id");
     }
+
 
     @Test
     @Description("Проверка, что нельзя создать двух одинаковых курьеров с одинаковыми данными. Должна быть ошибка с кодом 409.")
@@ -43,6 +47,9 @@ public class CourierCreationTest extends BaseTest {
         courierClient.create(courier);
         Response response = courierClient.create(courier);
         response.then().statusCode(409).body("message", equalTo("Этот логин уже используется. Попробуйте другой."));
+        // теперь удаляем курьера здесь тоже
+        Response loginResponse = courierClient.login(CourierCredentials.from(courier));
+        courierId = loginResponse.then().extract().path("id");
     }
 
     @Test
@@ -59,14 +66,5 @@ public class CourierCreationTest extends BaseTest {
         courier.setPassword(null);
         Response response = courierClient.create(courier);
         response.then().statusCode(400).body("message", equalTo("Недостаточно данных для создания учетной записи"));
-    }
-
-    @Test
-    @Description("Проверка логина курьера с правильными данными. Должен быть возвращен id курьера.")
-    public void loginAfterCreationReturnsId() {
-        courierClient.create(courier);
-        Response loginResponse = courierClient.login(CourierCredentials.from(courier));
-        loginResponse.then().statusCode(200).body("id", notNullValue());
-        courierId = loginResponse.then().extract().path("id");
     }
 }

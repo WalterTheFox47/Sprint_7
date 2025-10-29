@@ -1,5 +1,6 @@
 package scooter.model;
 
+import com.github.javafaker.Faker;
 import java.util.List;
 import java.util.Random;
 
@@ -18,24 +19,24 @@ public class Order {
     }
 
     public static Order getRandom() {
+        Faker faker = new Faker();
         Random random = new Random();
 
-        String[] firstNames = {"Naruto", "Sasuke", "Kakashi", "Sakura", "Hinata"};
-        String[] lastNames = {"Uchiha", "Haruno", "Hatake", "Namikaze", "Nara"};
-        String[] addresses = {"Konoha, 142 apt.", "Suna, 58 apt.", "Kiri, 99 apt.", "Iwa, 25 apt.", "Konoha, 99 apt."};
-        String[] phoneNumbers = {"+7 800 355 35 35", "+7 800 123 45 67", "+7 800 765 43 21", "+7 800 987 65 43"};
-        String[] comments = {"Sasuke, come back to Konoha", "I am looking for Naruto", "My name is Sakura", "Please be careful with my order"};
-        String[] deliveryDates = {"2020-06-06", "2021-05-15", "2022-04-10", "2023-03-20"};
         List<String> colors = List.of("BLACK", "GREY");
 
-        String firstName = firstNames[random.nextInt(firstNames.length)];
-        String lastName = lastNames[random.nextInt(lastNames.length)];
-        String address = addresses[random.nextInt(addresses.length)];
+        String firstName = faker.name().firstName();
+        String lastName = faker.name().lastName();
+        String address = faker.address().fullAddress();
         int metroStation = random.nextInt(10) + 1;
-        String phone = phoneNumbers[random.nextInt(phoneNumbers.length)];
+        String phone = faker.phoneNumber().phoneNumber();
         int rentTime = random.nextInt(12) + 1;
-        String deliveryDate = deliveryDates[random.nextInt(deliveryDates.length)];
-        String comment = comments[random.nextInt(comments.length)];
+
+        String deliveryDate = faker.date().past(365, java.util.concurrent.TimeUnit.DAYS).toInstant()
+                .atZone(java.time.ZoneId.systemDefault())
+                .toLocalDate()
+                .toString();
+
+        String comment = faker.lorem().sentence();
 
         int colorCount = random.nextInt(3);
         List<String> color;
@@ -49,6 +50,8 @@ public class Order {
 
         return new Order(firstName, lastName, address, metroStation, phone, rentTime, deliveryDate, comment, color);
     }
+
+
 
     public Order(String firstName, String lastName, String address, int metroStation, String phone, int rentTime, String deliveryDate, String comment, List<String> color) {
         this.firstName = firstName;
